@@ -24,11 +24,7 @@ def notface(c, nx, ny):
 
 resize = (227, 227)
 tdir=os.path.expanduser('~/aflw')
-<<<<<<< HEAD
 odir=os.path.expanduser('~/caffe-model-project')
-=======
-odir=os.path.expanduser('~/caffe/myModel')
->>>>>>> 168320541f8e8825fdb9cb5b0d06ab97aaaac299
 #imgset = list(sys.argv[1]) # 0,2,3
 if len(sys.argv)>1:
 	offset = int(sys.argv[1])
@@ -58,11 +54,7 @@ with open(tdir+'/frp.txt') as f:
 		h=int(l[5]) # face rect height
 
 		try:
-<<<<<<< HEAD
 			img = Image.open(tdir+'/'+imgpath)
-=======
-			img = Image.open(imgpath)
->>>>>>> 168320541f8e8825fdb9cb5b0d06ab97aaaac299
 			width, height = img.size
 			# shift the face rect by random margins
 			rx = x + random.randint(-w/4, w/4)

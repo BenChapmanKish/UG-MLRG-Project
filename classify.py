@@ -6,7 +6,7 @@ import numpy as np
 import caffe
 
 caffe_path = os.path.expanduser('~/caffe/')
-model_dir = os.path.expanduser('~/caffe-model-project')
+model_dir = os.path.expanduser('~/caffe-model-project/')
 deploy = sys.argv[1]
 if deploy[0] != '/':
 	deploy = model_dir + deploy
@@ -15,12 +15,12 @@ if model_name[0] != '/':
 	model_name = model_dir + model_name
 
 repeat=False
+image_path_set=False
 if len(sys.argv) > 3:
 	if sys.argv[3] in ('-r', '--repeat'):
 		repeat=True
-		image_path = raw_input('Enter image path: ').replace("'", "").strip()
-		image_path = os.path.expanduser(image_path)
 	else:
+		image_path_set=True
 		image_path = sys.argv[3]
 		image_path = os.path.expanduser(image_path)
 
@@ -42,6 +42,9 @@ transformer.set_raw_scale('data', 255.0)
 net.blobs['data'].reshape(1,3,227,227)
 
 while True:
+	if not image_path_set:
+		image_path = raw_input('Enter image path: ').replace("'", "").strip()
+		image_path = os.path.expanduser(image_path)
 
 	#load the image in the data layer
 	im = caffe.io.load_image(image_path)
@@ -60,8 +63,6 @@ while True:
 	#labels = np.loadtxt(caffe_path+"data/ilsvrc12/synset_words.txt", str, delimiter='\t')
 	#top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
 	#print labels[top_k]
-	if not repeat:
+	if image_path_set or not repeat:
 		break
-	image_path = raw_input('Enter image path: ').replace("'", "").strip()
-	image_path = os.path.expanduser(image_path)
 
