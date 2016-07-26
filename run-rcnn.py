@@ -127,7 +127,7 @@ if __name__ == '__main__':
 	#						  NETS[args.demo_net][1])
 
 	prototxt = os.path.expanduser('~/caffe-model-project/deploy-rcnn.pt')
-	caffemodel = os.path.expanduser('~/caffe-model-project/models/caffe_train_iter_30000.caffemodel')
+	caffemodel = os.path.expanduser('~/py-faster-rcnn/output/default/train/vgg_cnn_m_1024_rpn_stage1_iter_20000.caffemodel')
 
 	if not os.path.isfile(caffemodel):
 		raise IOError(('{:s} not found.\nDid you run ./data/script/'
