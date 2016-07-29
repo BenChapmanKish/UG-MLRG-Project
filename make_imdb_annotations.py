@@ -16,8 +16,10 @@ class ImgFace(object):
 		self.faces = []
 		self.n = 0
 	def add_face(self, x, y, w, h):
-		self.faces.append((x, y, x+w, y+h))
-		self.n += 1
+		if not(x<0 or y<0 or x+w>self.w or y+h>self.h):	
+			self.faces.append((x, y, x+w, y+h))
+			#self.faces.append((max(x, 0), max(y, 0), min(x+w, self.w), min(y+h, self.h)))
+			self.n += 1
 
 with open(os.path.expanduser('~/aflw/frp.txt')) as f:
 	facedata = [x.split() for x in f.readlines()]
@@ -44,6 +46,8 @@ for i in range(nfaces):
 nimages=len(imgind)
 for i in range(nimages):
 	imf=imgface[imgind[i]]
+	if imf.n == 0:
+		continue
 	annot_text = '''\
 # PASCAL Annotation Version 1.00
 
