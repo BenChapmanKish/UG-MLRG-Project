@@ -16,7 +16,33 @@ class Team(object):
 		self.score = 0
 		self.paddle = None
 
+class CenterLine(object):
+	"""
+	CenterLine(MainGameHandler, X-Position, DashCount, LineWidth, Color) -> CenterLine
+
+	A dashed line that divides the game window into two areas.
+	"""
+	def __init__(self, game, xpos, dashes, width, col):
+		self.game = game
+		self.xpos = xpos
+		self.w = width
+		self.i = self.game.size[1] / (2.0*dashes-1)
+		self.col = col
+	
+	def draw(self):
+		"""
+		draw() -> None
+		"""
+		y=0
+		while y < self.game.size[1] + self.i:
+			pygame.draw.line(self.game.screen, self.col, (self.xpos, y), (self.xpos, y+self.i), self.w)
+			y += 2*self.i
+
 class Sprite(object):
+	"""
+	Sprite(...) -> Sprite
+	[Not yet implemented]
+	"""
 	def __init__(self, surface, sprite, pos, size, angle):
 		self.surface = surface
 		self.originalSprite = sprite
@@ -299,6 +325,7 @@ class Game(object):
 		self.balls = []
 		self.paddles = []
 		self.sprites = (self.balls, self.paddles, self.texts)
+		self.line = CenterLine(self, self.size[0]/2, 15, 1, (127,)*3)
 		
 		self.newPaddle(self.teams[0], 100)
 		self.newPaddle(self.teams[1], -100)
@@ -462,6 +489,7 @@ class Game(object):
 		followed by updating the contents of the display.
 		"""
 		self.screen.fill(self.bgcolor)
+		self.line.draw()
 		for x in self.paddles:
 			x.draw()
 		for x in self.balls:
