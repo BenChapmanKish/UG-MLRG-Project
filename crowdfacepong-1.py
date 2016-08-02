@@ -9,7 +9,7 @@ class Paddle(object):
 	def __init__(self, game, team, pos, size, col):
 		self.team = team
 		self.dir = 0
-		self.moverate = 5.0
+		self.moverate = 7.0
 		self.rect = pygame.Rect(pos, size)
 		self.col = col
 		self.game = game
@@ -26,9 +26,24 @@ class Ball(object):
 		self.vel = vel
 		self.rad = rad
 		self.ocol = col # Original color
-		self.col = col
-		self.inplay = True
+		self.col = map(lambda x: x/2, self.ocol)
+		self.inplay = False
 		self.game = game
+
+		# Temporary unoptimized solution:
+		angle = math.atan2(self.vel[1], self.vel[0])
+		offsetx = math.cos(angle) * self.rad * 1.2
+		offsety = math.sin(angle) * self.rad * 1.2
+		line0 = [self.pos[0] + offsetx, self.pos[1] + offsety]
+		line1 = [self.pos[0] + offsetx + self.vel[0] * 5, self.pos[1] + offsety + self.vel[1] * 5]
+		self.line = ((line0, line1))
+
+		self.game.newTimer(3000, self.enterPlay)
+
+	def enterPlay(self):
+		self.col = self.ocol
+		self.line = None
+		self.inplay = True
 		
 	def move(self):
 		self.pos[0] += self.vel[0]
@@ -37,26 +52,25 @@ class Ball(object):
 			self.vel[1] *= -1
 		if self.pos[0] + self.rad > self.game.size[0]:
 			self.game.scores[1] += 1
-			self.reset()
-		else if self.pos[0] - self.rad < 0:
+			self.destroy(True)
+			return
+		elif self.pos[0] - self.rad < 0:
 			self.game.scores[0] += 1
-			self.reset()
+			self.destroy(True)
+			return
 		#for p in self.game.paddles:
 		#	if self.pos
-
-	def reset(self):
-		self.inplay = False
-		self.pos = map(lambda x: x/2.0, self.game.size)
-		self.col = self.col[:3] + (self.col[3] / 2,)
-		self.game.newTimer(3000, self.enterPlay, self)
 	
-	def enterPlay(self)
-		self.col = self.ocol
-		self.inplay = True
+	def destroy(self, replace = False):
+		if replace:
+			self.game.newBall()
+		self.game.balls.remove(self)
 			
 	def draw(self):
 		pygame.draw.circle(self.game.screen, self.col, map(int, self.pos), self.rad)
-			
+		if self.line:
+			pygame.draw.line(self.game.screen, self.col, map(int, self.line[0]), map(int, self.line[1]), 2)
+	
 class Game(object):
 	def __init__(self, size):
 		pygame.init()
@@ -84,13 +98,13 @@ class Game(object):
 			# Initialize a random velocity, where the X velocity won't be close to 0 and the values are floats
 		self.balls.append(Ball(self, pos, vel, rad, col))
 	
-	def newPaddle(self, team, pos, size = (50, 250), col = pygame.Color("white")):
+	def newPaddle(self, team, pos, size = (25, 230), col = pygame.Color("white")):
 		if isinstance(pos, (int, long, float)):
-			pos = [pos, self.size[1] / 2.0]
+			pos = [pos, self.size[1] / 2.0 - size[1] / 2.0]
 		self.paddles.append(Paddle(self, team, pos, size, col))
 	
 	def newTimer(self, delay, func, args = ()):
-		self.timers.append((pygame.time.get_ticks(), delay, func, args))
+		self.timers.append((pygame.time.get_ticks() + delay, func, args))
 		
 	def eventLoop(self):
 		for event in pygame.event.get():
@@ -118,13 +132,14 @@ class Game(object):
 				b.move()
 	
 	def timerCheck(self):
-		newtimers = []
-		for time, func, args in self.timers:
+		i=0
+		while i < len(self.timers):
+			time, func, args = self.timers[i]
 			if time <= pygame.time.get_ticks():
 				func(*args)
+				self.timers.pop(i)
 			else:
-				newtimers.append((time, func, args))
-		self.timers = newtimers
+				i+=1
 	
 	def render(self):
 		self.screen.fill(self.bgcolor)
@@ -138,6 +153,7 @@ class Game(object):
 		while self.running:
 			self.eventLoop()
 			self.update()
+			self.timerCheck()
 			self.render()
 			self.clock.tick(self.FPS)
 	
